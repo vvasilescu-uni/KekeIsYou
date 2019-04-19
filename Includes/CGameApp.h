@@ -72,9 +72,7 @@ private:
 	void		AnimateObjects();
 	void		DrawObjects();
 	void		ProcessInput();
-	void		holdInside(Unit& unit);
-	bool		HasColided(Unit& unit);
-	void		CheckCollision(Unit& unit);
+	bool		holdInside(Unit& unit, ULONG dir);
 	bool		CanMove(Unit& unit, ULONG dir);
 	
 	//-------------------------------------------------------------------------
@@ -109,6 +107,9 @@ private:
 	int							frameCounter;
 
 	std::list<Unit*>			units;
+
+	Vec2						ulCorner;
+	Vec2						drCorner;
 };
 
 #endif // _CGAMEAPP_H_

@@ -214,10 +214,13 @@ void CGameApp::SetupGameState()
 	units.push_back(new Unit(_Buffer, "data/ship1.bmp", Vec2(500, 500)));
 	units.back()->currentState = Unit::STATE::MOVE;
 
-	units.push_back(new Unit(_Buffer, "data/ship1.bmp", Vec2(500, 600)));
-	units.back()->currentState = Unit::STATE::MOVE;
+	units.push_back(new Unit(_Buffer, "data/ship2.bmp", Vec2(500, 600)));
+	units.back()->currentState = Unit::STATE::STOP;
 
 	_gameState = GameState::START;
+
+	ulCorner = Vec2(110.0, 40.0);
+	drCorner = Vec2(1810.0, 1040.0);
 }
 
 void CGameApp::ReleaseObjects()
@@ -259,20 +262,25 @@ void CGameApp::ProcessInput()
 	if (!GetKeyboardState(pKeyBuffer)) return;
 
 	if (pKeyBuffer[0x57] & 0xF0) {
-		Direction |= Unit::DIR_FORWARD;
+		Direction = Unit::DIR_FORWARD;
 	}
 	else if (pKeyBuffer[0x53] & 0xF0) {
-		Direction |= Unit::DIR_BACKWARD;
+		Direction = Unit::DIR_BACKWARD;
 	}
 	else if (pKeyBuffer[0x41] & 0xF0) {
-		Direction |= Unit::DIR_LEFT;
+		Direction = Unit::DIR_LEFT;
 	}
 	else if (pKeyBuffer[0x44] & 0xF0) {
-		Direction |= Unit::DIR_RIGHT;
+		Direction = Unit::DIR_RIGHT;
 	}
+	
+	if (Direction != 0)
+	{
+		for (auto& unit : units) {
+			if (!CanMove(*unit, Direction)) {
+				continue;
+			}
 
-	for (auto& unit : units) {
-		if (unit->currentState == Unit::MOVE && CanMove(*unit, Direction)) {
 			unit->Move(Direction);
 		}
 	}
@@ -291,8 +299,6 @@ void CGameApp::AnimateObjects()
 
 	for (auto & unit : units) {
 		unit->Update();
-		holdInside(*unit);
-		CheckCollision(*unit);
 	}
 }
 
@@ -310,68 +316,82 @@ void CGameApp::DrawObjects()
 	_Buffer->present();
 }
 
-void CGameApp::holdInside(Unit& unit) 
+bool CGameApp::holdInside(Unit& unit, ULONG dir) 
 {
-	if (unit.Position().x + (unit.getSize().x / 2) >= _screenSize.x) {
-		unit.Position().x = _screenSize.x - (unit.getSize().x / 2);
-		unit.newPosition.x = _screenSize.x - (unit.getSize().x / 2);
+	switch (dir) {
+	case Unit::DIR_RIGHT:
+		if (unit.Position().x + 100 > drCorner.x) {
+			return false;
+		}
+		break;
+
+	case Unit::DIR_LEFT:
+		if (unit.Position().x - 100 < ulCorner.x) {
+			return false;
+		}
+		break;
+
+	case Unit::DIR_BACKWARD:
+		if (unit.Position().y + 100 > drCorner.y) {
+			return false;
+		}
+		break;
+
+	case Unit::DIR_FORWARD:
+		if (unit.Position().y - 100 < ulCorner.y) {
+			return false;
+		}
+		break;
+
+	default:
+		break;
 	}
 
-	if (unit.Position().x - (unit.getSize().x / 2) <= 0) {
-		unit.Position().x = unit.getSize().x / 2;
-		unit.newPosition.x = unit.getSize().x / 2;
-	}
-
-	if (unit.Position().y + (unit.getSize().y / 2) >= _screenSize.y) {
-		unit.Position().y = _screenSize.y - (unit.getSize().y / 2);
-		unit.newPosition.y = _screenSize.y - (unit.getSize().y / 2);
-	}
-
-	if (unit.Position().y - (unit.getSize().y / 2) <= 0) {
-		unit.Position().y = unit.getSize().y / 2;
-		unit.newPosition.y = unit.getSize().y / 2;
-	}
-}
-
-bool CGameApp::HasColided(Unit& unit)
-{
-	return false;
-}
-
-void CGameApp::CheckCollision(Unit& unit)
-{
-	if (!HasColided(unit)) {
-		return;
-	}
+	return true;
 }
 
 bool CGameApp::CanMove(Unit& unit, ULONG dir)
 {
+	if (unit.currentState != Unit::MOVE) {
+		return false;
+	}
+
+	return holdInside(unit, dir);
+
 	for (auto& otherUnit : units) {
-		if (otherUnit == &unit) {
+		if (otherUnit->Position() == unit.Position()) {
+			continue;
+		}
+		if (otherUnit->currentState != Unit::STOP) {
 			continue;
 		}
 
 		switch (dir) {
 		case Unit::DIR_FORWARD:
-			if (unit.Position().y == otherUnit->Position().y + 100) {
+			if (unit.Position().y - 100.0 == otherUnit->Position().y) {
 				return false;
 			}
 			break;
+		
 		case Unit::DIR_BACKWARD:
-			if (unit.Position().y == otherUnit->Position().y - 100) {
+			if (unit.Position().y + 100.0 == otherUnit->Position().y) {
 				return false;
 			}
 			break;
+		
 		case Unit::DIR_LEFT:
-			if (unit.Position().x == otherUnit->Position().x + 100) {
+			if (unit.Position().x - 100.0 == otherUnit->Position().x) {
 				return false;
 			}
 			break;
+		
 		case Unit::DIR_RIGHT:
-			if (unit.Position().x == otherUnit->Position().x - 100) {
+			if (unit.Position().x + 100.0 == otherUnit->Position().x) {
 				return false;
 			}
+			break;
+
+		default:
 			break;
 		}
 	}
