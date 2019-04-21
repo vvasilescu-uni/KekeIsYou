@@ -74,6 +74,8 @@ private:
 	void		ProcessInput();
 	bool		holdInside(Unit& unit, ULONG dir);
 	bool		CanMove(Unit& unit, ULONG dir);
+	void		KillUnits();
+	void		CheckWin();
 	
 	//-------------------------------------------------------------------------
 	// Private Static Functions For This Class
@@ -110,6 +112,9 @@ private:
 
 	Vec2						ulCorner;
 	Vec2						drCorner;
+
+	Sprite*						loseScreen;
+	Sprite*						winScreen;
 };
 
 #endif // _CGAMEAPP_H_

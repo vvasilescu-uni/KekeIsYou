@@ -191,7 +191,6 @@ LRESULT CGameApp::DisplayWndProc( HWND hWnd, UINT Message, WPARAM wParam, LPARAM
 
 		default:
 			return DefWindowProc(hWnd, Message, wParam, lParam);
-
 	}
 	
 	return 0;
@@ -200,6 +199,14 @@ LRESULT CGameApp::DisplayWndProc( HWND hWnd, UINT Message, WPARAM wParam, LPARAM
 bool CGameApp::BuildObjects()
 {
 	_Buffer = new BackBuffer(m_hWnd, m_nViewWidth, m_nViewHeight);
+
+	loseScreen = new Sprite("data/losescreen.bmp", RGB(0xff, 0x00, 0xff));
+	loseScreen->mPosition = Vec2(_screenSize.x / 2, _screenSize.y / 2);
+	loseScreen->setBackBuffer(_Buffer);
+	
+	winScreen = new Sprite("data/winscreen.bmp", RGB(0xff, 0x00, 0xff));
+	winScreen->mPosition = Vec2(_screenSize.x / 2, _screenSize.y / 2);
+	winScreen->setBackBuffer(_Buffer);
 
 	frameCounter = 0;
 
@@ -215,12 +222,12 @@ void CGameApp::SetupGameState()
 	units.back()->currentState = Unit::STATE::MOVE;
 
 	units.push_back(new Unit(_Buffer, "data/ship2.bmp", Vec2(500, 600)));
-	units.back()->currentState = Unit::STATE::STOP;
+	units.back()->currentState = Unit::STATE::WIN;
 
-	_gameState = GameState::START;
+	_gameState = GameState::ONGOING;
 
 	ulCorner = Vec2(110.0, 40.0);
-	drCorner = Vec2(1810.0, 1040.0);
+	drCorner = Vec2(1810.0, 940.0);
 }
 
 void CGameApp::ReleaseObjects()
@@ -250,6 +257,8 @@ void CGameApp::FrameAdvance()
 	ProcessInput();
 	AnimateObjects();
 	DrawObjects();
+	KillUnits();
+	CheckWin();
 }
 
 void CGameApp::ProcessInput()
@@ -309,8 +318,23 @@ void CGameApp::DrawObjects()
 
 	m_imgBackground.Paint(_Buffer->getDC(), 0, 0);
 
-	for (auto unit : units) {
-		unit->Draw();
+	switch (_gameState) {
+	case CGameApp::ONGOING:
+		for (auto unit : units) {
+			unit->Draw();
+		}
+		break;
+
+	case CGameApp::LOST:
+		loseScreen->draw();
+		break;
+
+	case CGameApp::WON:
+		winScreen->draw();
+		break;
+
+	default:
+		break;
 	}
 
 	_Buffer->present();
@@ -356,7 +380,9 @@ bool CGameApp::CanMove(Unit& unit, ULONG dir)
 		return false;
 	}
 
-	return holdInside(unit, dir);
+	if (!holdInside(unit, dir)) {
+		return false;
+	}
 
 	for (auto& otherUnit : units) {
 		if (otherUnit->Position() == unit.Position()) {
@@ -366,35 +392,73 @@ bool CGameApp::CanMove(Unit& unit, ULONG dir)
 			continue;
 		}
 
-		switch (dir) {
-		case Unit::DIR_FORWARD:
-			if (unit.Position().y - 100.0 == otherUnit->Position().y) {
-				return false;
-			}
-			break;
-		
-		case Unit::DIR_BACKWARD:
-			if (unit.Position().y + 100.0 == otherUnit->Position().y) {
-				return false;
-			}
-			break;
-		
-		case Unit::DIR_LEFT:
-			if (unit.Position().x - 100.0 == otherUnit->Position().x) {
-				return false;
-			}
-			break;
-		
-		case Unit::DIR_RIGHT:
-			if (unit.Position().x + 100.0 == otherUnit->Position().x) {
-				return false;
-			}
-			break;
-
-		default:
-			break;
+		if (unit.WillColide(*otherUnit, (Unit::DIRECTION)dir))
+		{
+			return false;
 		}
 	}
 
 	return true;
+}
+
+void CGameApp::KillUnits()
+{
+	for (auto& unit : units) {
+		if (unit->currentState == Unit::DEATH) {
+			continue;
+		}
+
+		for (auto& otherUnit : units) {
+			if (unit->Position() == otherUnit->Position()) {
+				continue;
+			}
+
+			if (otherUnit->currentState != Unit::DEATH) {
+				continue;
+			}
+
+			if (unit->IsColided(*otherUnit)) {
+				unit->currentState = Unit::ISDEAD;
+			}
+		}
+	}
+
+	for (auto& unit : units) {
+		if (unit->currentState == Unit::ISDEAD) {
+			delete unit;
+			units.remove(unit);
+			break;
+		}
+	}
+
+	int noAliveUnits = 0;
+
+	for (auto& unit : units) {
+		if (unit->currentState == Unit::MOVE) {
+			++noAliveUnits;
+		}
+	}
+
+	if (!noAliveUnits) {
+		_gameState = CGameApp::LOST;
+	}
+}
+
+void CGameApp::CheckWin()
+{
+	for (auto& unit : units) {
+		if (unit->currentState != Unit::MOVE) {
+			continue;
+		}
+
+		for (auto& otherUnit : units) {
+			if (otherUnit->currentState != Unit::WIN) {
+				continue;
+			}
+
+			if (unit->IsColided(*otherUnit)) {
+				_gameState = CGameApp::WON;
+			}
+		}
+	}
 }

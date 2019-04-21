@@ -45,7 +45,8 @@ public:
 		DEATH = 2,
 		STOP = 3,
 		WIN = 4,
-		PUSH = 5
+		PUSH = 5,
+		ISDEAD
 	};
 	//-------------------------------------------------------------------------
 	// Public Variables for This Class.
@@ -69,6 +70,8 @@ public:
 	Vec2&					Position();
 	Vec2					getSize();
 	int&					frameCounter();
+	bool					WillColide(Unit& otherUnit, Unit::DIRECTION dir);
+	bool					IsColided(Unit& otherUnit);
 
 
 private:

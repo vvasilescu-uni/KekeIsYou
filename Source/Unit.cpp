@@ -31,6 +31,8 @@ Unit::Unit(const BackBuffer *pBackBuffer, const char* texturePath, Vec2 position
 
 	Position() = position;
 	newPosition = position;
+	currentState = Unit::STOP;
+	directionState = (Unit::DIRECTION)0;
 }
 
 //-----------------------------------------------------------------------------
@@ -106,4 +108,47 @@ Vec2 Unit::getSize()
 int& Unit::frameCounter()
 {
 	return _sprite->frameCounter;
+}
+
+bool Unit::WillColide(Unit& otherUnit, Unit::DIRECTION dir)
+{
+	Vec2 collisionPos;
+
+	switch (dir)
+	{
+	case Unit::DIR_FORWARD:
+		collisionPos = Vec2(Position().x, Position().y - 100);
+		break;
+
+	case Unit::DIR_BACKWARD:
+		collisionPos = Vec2(Position().x, Position().y + 100);
+		break;
+
+	case Unit::DIR_LEFT:
+		collisionPos = Vec2(Position().x - 100, Position().y);
+		break;
+
+	case Unit::DIR_RIGHT:
+		collisionPos = Vec2(Position().x + 100, Position().y);
+		break;
+	}
+
+	if (collisionPos.x > otherUnit.Position().x - 10 && collisionPos.x < otherUnit.Position().x + 10) {
+		if (collisionPos.y > otherUnit.Position().y - 10 && collisionPos.y < otherUnit.Position().y + 10) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool Unit::IsColided(Unit& otherUnit)
+{
+	if (Position().x > otherUnit.Position().x - 10 && Position().x < otherUnit.Position().x + 10) {
+		if (Position().y > otherUnit.Position().y - 10 && Position().y < otherUnit.Position().y + 10) {
+			return true;
+		}
+	}
+
+	return false;
 }
