@@ -65,6 +65,10 @@ void Unit::Update()
 		Position().y -= 5;
 	}
 
+	if (abs(Position().x - newPosition.x) + abs(Position().y - newPosition.y) < 50) {
+		directionState = Unit::DIR_STOP;
+	}
+
 	frameCounter()++;
 }
 
@@ -133,8 +137,8 @@ bool Unit::WillColide(Unit& otherUnit, Unit::DIRECTION dir)
 		break;
 	}
 
-	if (collisionPos.x > otherUnit.Position().x - 10 && collisionPos.x < otherUnit.Position().x + 10) {
-		if (collisionPos.y > otherUnit.Position().y - 10 && collisionPos.y < otherUnit.Position().y + 10) {
+	if (collisionPos.x > otherUnit.Position().x - 40 && collisionPos.x < otherUnit.Position().x + 40) {
+		if (collisionPos.y > otherUnit.Position().y - 40 && collisionPos.y < otherUnit.Position().y + 40) {
 			return true;
 		}
 	}
@@ -144,8 +148,8 @@ bool Unit::WillColide(Unit& otherUnit, Unit::DIRECTION dir)
 
 bool Unit::IsColided(Unit& otherUnit)
 {
-	if (Position().x > otherUnit.Position().x - 10 && Position().x < otherUnit.Position().x + 10) {
-		if (Position().y > otherUnit.Position().y - 10 && Position().y < otherUnit.Position().y + 10) {
+	if (Position().x > otherUnit.Position().x - 7 && Position().x < otherUnit.Position().x + 7) {
+		if (Position().y > otherUnit.Position().y - 7 && Position().y < otherUnit.Position().y + 7) {
 			return true;
 		}
 	}

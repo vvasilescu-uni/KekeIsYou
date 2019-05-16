@@ -16,7 +16,7 @@
 #include "Main.h"
 #include "Sprite.h"
 
-#include <vector>
+#include <string>
 
 //-----------------------------------------------------------------------------
 // Main Class Definitions
@@ -33,6 +33,7 @@ public:
 	//-------------------------------------------------------------------------
 	enum DIRECTION 
 	{ 
+		DIR_STOP		= 0,
 		DIR_FORWARD		= 1,
 		DIR_BACKWARD	= 2,
 		DIR_LEFT		= 4,
@@ -46,14 +47,18 @@ public:
 		STOP = 3,
 		WIN = 4,
 		PUSH = 5,
-		ISDEAD
+		ISDEAD = 6,
+		NOCOLIDE = 7
 	};
 	//-------------------------------------------------------------------------
 	// Public Variables for This Class.
 	//-------------------------------------------------------------------------
 	STATE currentState;
+	STATE specialState;
+
 	DIRECTION directionState;
 	Vec2 newPosition;
+	std::string name;
 
 	//-------------------------------------------------------------------------
 	// Constructors & Destructors for This Class.

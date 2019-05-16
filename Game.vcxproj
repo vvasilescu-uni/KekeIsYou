@@ -169,12 +169,12 @@
     <ClCompile Include="Source\MenuSprite.cpp" />
     <ClCompile Include="Source\ResizeEngine.cpp" />
     <ClCompile Include="Source\Sprite.cpp" />
+    <ClCompile Include="Source\Statements.cpp" />
     <ClCompile Include="Source\Unit.cpp" />
     <ClCompile Include="Source\Vec2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Includes\BackBuffer.h" />
-    <ClInclude Include="Includes\Bullet.h" />
     <ClInclude Include="Includes\CGameApp.h" />
     <ClInclude Include="Includes\CTimer.h" />
     <ClInclude Include="Includes\Filters.h" />
@@ -183,6 +183,7 @@
     <ClInclude Include="Includes\MenuSprite.h" />
     <ClInclude Include="Includes\ResizeEngine.h" />
     <ClInclude Include="Includes\Sprite.h" />
+    <ClInclude Include="Includes\Statements.h" />
     <ClInclude Include="Includes\Unit.h" />
     <ClInclude Include="Includes\Vec2.h" />
     <ClInclude Include="Res\resource.h" />

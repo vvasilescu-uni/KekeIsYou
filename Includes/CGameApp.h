@@ -17,8 +17,8 @@
 #include "Unit.h"
 #include "BackBuffer.h"
 #include "ImageFile.h"
-#include "Bullet.h"
 #include "MenuSprite.h"
+#include "Statements.h"
 
 #include <list>
 #include <string>
@@ -76,6 +76,9 @@ private:
 	bool		CanMove(Unit& unit, ULONG dir);
 	void		KillUnits();
 	void		CheckWin();
+	void		PushUnits();
+	bool		CanPush(Unit& unitA, Unit& unitB);
+	void		UpdateStates();
 	
 	//-------------------------------------------------------------------------
 	// Private Static Functions For This Class
@@ -115,6 +118,8 @@ private:
 
 	Sprite*						loseScreen;
 	Sprite*						winScreen;
+
+	Statements					statements;
 };
 
 #endif // _CGAMEAPP_H_

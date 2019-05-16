@@ -48,6 +48,9 @@
     <ClCompile Include="Source\Unit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Statements.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Includes\BackBuffer.h">
@@ -80,13 +83,13 @@
     <ClInclude Include="Res\resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="Includes\Bullet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Includes\MenuSprite.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Includes\Unit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\Statements.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

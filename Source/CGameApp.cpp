@@ -49,12 +49,7 @@ bool CGameApp::InitInstance( LPCTSTR lpCmdLine, int iCmdShow )
 
 bool CGameApp::CreateDisplay()
 {
-	HMONITOR hM = MonitorFromWindow(m_hWnd, MONITOR_DEFAULTTONEAREST);
-	MONITORINFO mInfo = { sizeof(mInfo) };
-
-	if (!GetMonitorInfo(hM, &mInfo)) return NULL;
-
-	_screenSize = Vec2(mInfo.rcMonitor.right, mInfo.rcMonitor.bottom);
+	_screenSize = Vec2(1920, 1080);
 
 	LPTSTR			WindowTitle		= _T("GameFramework");
 	LPCSTR			WindowClass		= _T("GameFramework_Class");
@@ -218,16 +213,40 @@ bool CGameApp::BuildObjects()
 
 void CGameApp::SetupGameState()
 {
-	units.push_back(new Unit(_Buffer, "data/ship1.bmp", Vec2(500, 500)));
-	units.back()->currentState = Unit::STATE::MOVE;
+	statements.prefixes.push_back(new Unit(_Buffer, "data/unit.bmp", Vec2(300, 400)));
+	statements.prefixes.back()->name = "unit";
+	statements.prefixes.back()->currentState = Unit::PUSH;
+	
+	statements.connectors.push_back(new Unit(_Buffer, "data/unit.bmp", Vec2(400, 400)));
+	statements.connectors.back()->currentState = Unit::PUSH;
+	
+	statements.sufixes.push_back(new Unit(_Buffer, "data/unit.bmp", Vec2(500, 400)));
+	statements.sufixes.back()->specialState = Unit::PUSH;
+	statements.sufixes.back()->currentState = Unit::PUSH;
 
-	units.push_back(new Unit(_Buffer, "data/ship2.bmp", Vec2(500, 600)));
-	units.back()->currentState = Unit::STATE::WIN;
+	statements.prefixes.push_back(new Unit(_Buffer, "data/unit.bmp", Vec2(300, 100)));
+	statements.prefixes.back()->name = "player";
+	statements.prefixes.back()->currentState = Unit::PUSH;
+
+	statements.connectors.push_back(new Unit(_Buffer, "data/unit.bmp", Vec2(400, 100)));
+	statements.connectors.back()->currentState = Unit::PUSH;
+
+	statements.sufixes.push_back(new Unit(_Buffer, "data/unit.bmp", Vec2(500, 100)));
+	statements.sufixes.back()->specialState = Unit::MOVE;
+	statements.sufixes.back()->currentState = Unit::PUSH;
+
+	units.push_back(new Unit(_Buffer, "data/unit.bmp", Vec2(500, 500)));
+	units.back()->name = "player";
+	units.back()->currentState = statements.GetState(units.back()->name);
+
+	units.push_back(new Unit(_Buffer, "data/unit.bmp", Vec2(500, 600)));
+	units.back()->name = "unit";
+	units.back()->currentState = statements.GetState(units.back()->name);
 
 	_gameState = GameState::ONGOING;
 
 	ulCorner = Vec2(110.0, 40.0);
-	drCorner = Vec2(1810.0, 940.0);
+	drCorner = Vec2(1710.0, 940.0);
 }
 
 void CGameApp::ReleaseObjects()
@@ -259,6 +278,8 @@ void CGameApp::FrameAdvance()
 	DrawObjects();
 	KillUnits();
 	CheckWin();
+	PushUnits();
+	UpdateStates();
 }
 
 void CGameApp::ProcessInput()
@@ -309,6 +330,8 @@ void CGameApp::AnimateObjects()
 	for (auto & unit : units) {
 		unit->Update();
 	}
+
+	statements.Update();
 }
 
 void CGameApp::DrawObjects()
@@ -323,6 +346,7 @@ void CGameApp::DrawObjects()
 		for (auto unit : units) {
 			unit->Draw();
 		}
+		statements.Draw();
 		break;
 
 	case CGameApp::LOST:
@@ -388,6 +412,11 @@ bool CGameApp::CanMove(Unit& unit, ULONG dir)
 		if (otherUnit->Position() == unit.Position()) {
 			continue;
 		}
+
+		if (!holdInside(*otherUnit, dir) && unit.WillColide(*otherUnit, (Unit::DIRECTION)dir)) {
+			return false;
+		}
+
 		if (otherUnit->currentState != Unit::STOP) {
 			continue;
 		}
@@ -460,5 +489,59 @@ void CGameApp::CheckWin()
 				_gameState = CGameApp::WON;
 			}
 		}
+	}
+}
+
+void CGameApp::PushUnits()
+{
+	for (auto& unit : units) {
+		for (auto& otherUnit : units) {
+			if (CanPush(*unit, *otherUnit)) {
+				otherUnit->Move(unit->directionState);
+			}
+		}
+
+		for (auto& prefix : statements.prefixes) {
+			if (CanPush(*unit, *prefix)) {
+				prefix->Move(unit->directionState);
+			}
+		}
+
+		for (auto& con : statements.connectors) {
+			if (CanPush(*unit, *con)) {
+				con->Move(unit->directionState);
+			}
+		}
+
+		for (auto& sufix : statements.sufixes) {
+			if (CanPush(*unit, *sufix)) {
+				sufix->Move(unit->directionState);
+			}
+		}
+	}
+}
+
+bool CGameApp::CanPush(Unit& unitA, Unit& unitB)
+{
+	if (&unitA == &unitB) {
+		return false;
+	}
+	if (unitB.currentState != Unit::PUSH) {
+		return false;
+	}
+
+	if (unitA.WillColide(unitB, unitA.directionState)) {
+		if (holdInside(unitB, unitA.directionState)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void CGameApp::UpdateStates()
+{
+	for (auto& unit : units) {
+		unit->currentState = statements.GetState(unit->name);
 	}
 }
