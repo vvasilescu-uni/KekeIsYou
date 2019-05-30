@@ -29,6 +29,7 @@ public:
 	Vec2 mPosition;
 
 	int frameCounter;
+	const BackBuffer* mpBackBuffer;
 
 private:
 	// Make copy constructor and assignment operator private
@@ -44,7 +45,7 @@ protected:
 	BITMAP mMaskBM;
 
 	HDC mhSpriteDC;
-	const BackBuffer *mpBackBuffer;
+	
 
 	COLORREF mcTransparentColor;
 	void drawTransparent();

@@ -69,6 +69,37 @@ void Unit::Update()
 		directionState = Unit::DIR_STOP;
 	}
 
+	if (currentState == STATE::MOVE)
+	{
+		auto prevBF = _sprite->mpBackBuffer;
+		auto oldPos = Position();
+
+		switch (directionState)
+		{
+		case DIRECTION::DIR_FORWARD:
+			_sprite = new Sprite("data/keke_up.bmp", RGB(0xff, 0x00, 0xff));
+			break;
+		
+		case DIRECTION::DIR_BACKWARD:
+			_sprite = new Sprite("data/keke_down.bmp", RGB(0xff, 0x00, 0xff));
+			break;
+		
+		case DIRECTION::DIR_LEFT:
+			_sprite = new Sprite("data/keke_left.bmp", RGB(0xff, 0x00, 0xff));
+			break;
+		
+		case DIRECTION::DIR_RIGHT:
+			_sprite = new Sprite("data/keke_right.bmp", RGB(0xff, 0x00, 0xff));
+			break;
+
+		default:
+			break;
+		}
+
+		_sprite->setBackBuffer(prevBF);
+		Position() = oldPos;
+	}
+
 	frameCounter()++;
 }
 

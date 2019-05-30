@@ -213,35 +213,7 @@ bool CGameApp::BuildObjects()
 
 void CGameApp::SetupGameState()
 {
-	statements.prefixes.push_back(new Unit(_Buffer, "data/unit.bmp", Vec2(300, 400)));
-	statements.prefixes.back()->name = "unit";
-	statements.prefixes.back()->currentState = Unit::PUSH;
-	
-	statements.connectors.push_back(new Unit(_Buffer, "data/unit.bmp", Vec2(400, 400)));
-	statements.connectors.back()->currentState = Unit::PUSH;
-	
-	statements.sufixes.push_back(new Unit(_Buffer, "data/unit.bmp", Vec2(500, 400)));
-	statements.sufixes.back()->specialState = Unit::PUSH;
-	statements.sufixes.back()->currentState = Unit::PUSH;
-
-	statements.prefixes.push_back(new Unit(_Buffer, "data/unit.bmp", Vec2(300, 100)));
-	statements.prefixes.back()->name = "player";
-	statements.prefixes.back()->currentState = Unit::PUSH;
-
-	statements.connectors.push_back(new Unit(_Buffer, "data/unit.bmp", Vec2(400, 100)));
-	statements.connectors.back()->currentState = Unit::PUSH;
-
-	statements.sufixes.push_back(new Unit(_Buffer, "data/unit.bmp", Vec2(500, 100)));
-	statements.sufixes.back()->specialState = Unit::MOVE;
-	statements.sufixes.back()->currentState = Unit::PUSH;
-
-	units.push_back(new Unit(_Buffer, "data/unit.bmp", Vec2(500, 500)));
-	units.back()->name = "player";
-	units.back()->currentState = statements.GetState(units.back()->name);
-
-	units.push_back(new Unit(_Buffer, "data/unit.bmp", Vec2(500, 600)));
-	units.back()->name = "unit";
-	units.back()->currentState = statements.GetState(units.back()->name);
+	LoadLevel("1");
 
 	_gameState = GameState::ONGOING;
 
@@ -543,5 +515,62 @@ void CGameApp::UpdateStates()
 {
 	for (auto& unit : units) {
 		unit->currentState = statements.GetState(unit->name);
+	}
+}
+
+void CGameApp::LoadLevel(std::string levelID)
+{
+	auto levelPath = "Levels/" + levelID + ".txt";
+	auto levelFile = std::ifstream(levelPath);
+
+	int curLine;
+	while (levelFile >> curLine)
+	{
+		std::string unitType;
+		std::string texPath;
+		int posX, posY;
+		levelFile >> posX >> posY;
+		posX = 200 + posX * 100;
+		posY = 100 + posY * 100;
+
+		switch (curLine)
+		{
+		case 0:
+			// prefix logic
+			levelFile >> unitType;
+			texPath = "data/" + unitType + "_prx.bmp";
+			statements.prefixes.push_back(new Unit(_Buffer, texPath.c_str(), Vec2(posX, posY)));
+			statements.prefixes.back()->name = unitType;
+			statements.prefixes.back()->currentState = Unit::PUSH;
+			break;
+
+		case 1:
+			// connector logic
+			texPath = "data/is.bmp";
+			statements.connectors.push_back(new Unit(_Buffer, texPath.c_str(), Vec2(posX, posY)));
+			statements.connectors.back()->currentState = Unit::PUSH;
+			break;
+
+		case 2:
+			// sufix logic
+			levelFile >> unitType;
+			texPath = "data/" + unitType + "_sfx.bmp";
+			statements.sufixes.push_back(new Unit(_Buffer, texPath.c_str(), Vec2(posX, posY)));
+			statements.sufixes.back()->specialState = (Unit::STATE)std::stoi(unitType);
+			statements.sufixes.back()->currentState = Unit::PUSH;
+			break;
+
+		case 3:
+			// unit logic
+			levelFile >> unitType;
+			texPath = "data/" + unitType + ".bmp";
+			units.push_back(new Unit(_Buffer, texPath.c_str(), Vec2(posX, posY)));
+			units.back()->name = unitType;
+			units.back()->currentState = statements.GetState(units.back()->name);
+			break;
+
+		default:
+			break;
+		}
 	}
 }

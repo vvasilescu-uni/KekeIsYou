@@ -79,6 +79,7 @@ private:
 	void		PushUnits();
 	bool		CanPush(Unit& unitA, Unit& unitB);
 	void		UpdateStates();
+	void		LoadLevel(std::string levelID);
 	
 	//-------------------------------------------------------------------------
 	// Private Static Functions For This Class

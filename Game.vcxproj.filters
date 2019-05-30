@@ -16,6 +16,9 @@
     <Filter Include="Documents">
       <UniqueIdentifier>{774309c7-5c38-4185-ab64-478e4795e2f9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Levels">
+      <UniqueIdentifier>{6e75221d-408a-4cf5-832e-b345b5fce38b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\BackBuffer.cpp">
@@ -105,5 +108,10 @@
     <ResourceCompile Include="Res\Game.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Levels\1.txt">
+      <Filter>Levels</Filter>
+    </Text>
   </ItemGroup>
 </Project>
